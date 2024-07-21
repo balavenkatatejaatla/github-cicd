@@ -32,7 +32,7 @@ jobs:
     
     - name: Set Up MySQL Root Password
       run: |
-        sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'password';"
+        sudo mysql -e "CREATE USER IF NOT EXISTS 'student'@'%' IDENTIFIED BY 'student@1';"
         sudo systemctl restart mysql
 
     - name: Create Tomcat User and Group
@@ -83,7 +83,7 @@ jobs:
 
     - name: Create Database
       run: |
-        sudo mysql -u root -p"password" < /home/runner/work/github-cicd/github-cicd/studentapp/scripts/script.sql
+        sudo mysql -u student -p"student@1" < /home/runner/work/github-cicd/github-cicd/studentapp/scripts/script.sql
 
     - name: Configure Tomcat
       run: |
