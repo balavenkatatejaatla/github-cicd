@@ -29,6 +29,11 @@ jobs:
         sudo apt install -y mysql-server
         sudo systemctl start mysql
         sudo systemctl enable mysql
+    
+    - name: Set Up MySQL Root Password
+      run: |
+        sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'password';"
+        sudo systemctl restart mysql
 
     - name: Create Tomcat User and Group
       run: |
@@ -78,7 +83,7 @@ jobs:
 
     - name: Create Database
       run: |
-        sudo mysql < /home/runner/work/github-cicd/github-cicd/studentapp/scripts/script.sql
+        sudo mysql -u root -p"password" < /home/runner/work/github-cicd/github-cicd/studentapp/scripts/script.sql
 
     - name: Configure Tomcat
       run: |

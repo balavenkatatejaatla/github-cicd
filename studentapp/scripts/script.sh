@@ -42,7 +42,7 @@ install_java(){
 install_tomcat(){
 
 	log "INFO" "Downloading the tomcat8 war"
-	wget -nc https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.100/bin/apache-tomcat-8.5.100.tar.gz > /dev/null
+	wget -nc https://github.com/balavenkatatejaatla/maven-java-app/raw/main/scripts/apache-tomcat-8.5.100.tar.gz > /dev/null
 	log "INFO" "Download is success"
  	log "INFO" "Ectracting the tar"
 	sudo tar -zxvf apache-tomcat-8.5.100.tar.gz -C /opt/ > /dev/null
