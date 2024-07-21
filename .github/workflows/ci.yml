@@ -16,6 +16,9 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v2
 
+    - name: Print Current Working Directory
+      run: pwd
+
     - name: Set up Java
       run: |
         sudo apt update
@@ -75,7 +78,7 @@ jobs:
 
     - name: Create Database
       run: |
-        sudo mysql < /root/studentapp/scripts/script.sql
+        sudo mysql < ../../studentapp/scripts/script.sql
 
     - name: Configure Tomcat
       run: |
@@ -87,7 +90,7 @@ jobs:
 
     - name: Deploy WAR
       run: |
-        sudo cp /root/studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.100/webapps/
+        sudo cp ../../studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.100/webapps/
         sudo systemctl restart tomcat
 
     - name: Verify Deployment

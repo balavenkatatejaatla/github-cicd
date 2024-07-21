@@ -10,7 +10,7 @@ CREATE TABLE  if not exists  Students(student_id INT NOT NULL AUTO_INCREMENT,
 	PRIMARY KEY (student_id)
 );
 
--- CREATE USER 'student'@'%' IDENTIFIED BY 'student@1';
+CREATE USER IF NOT EXISTS 'student'@'%' IDENTIFIED BY 'student@1';
 
 GRANT ALL PRIVILEGES ON studentapp.* TO 'student'@'%';
 
