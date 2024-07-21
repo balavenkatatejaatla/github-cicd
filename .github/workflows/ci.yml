@@ -78,7 +78,7 @@ jobs:
 
     - name: Create Database
       run: |
-        sudo mysql < ../../studentapp/scripts/script.sql
+        sudo mysql < /home/runner/work/github-cicd/github-cicd/studentapp/scripts/script.sql
 
     - name: Configure Tomcat
       run: |
@@ -90,7 +90,7 @@ jobs:
 
     - name: Deploy WAR
       run: |
-        sudo cp ../../studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.100/webapps/
+        sudo cp /home/runner/work/github-cicd/github-cicd/studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.100/webapps/
         sudo systemctl restart tomcat
 
     - name: Verify Deployment
