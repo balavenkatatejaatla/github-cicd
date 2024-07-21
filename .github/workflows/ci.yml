@@ -27,9 +27,14 @@ jobs:
         sudo systemctl start mysql
         sudo systemctl enable mysql
 
+    - name: Create Tomcat User and Group
+      run: |
+        sudo groupadd tomcat8 || true
+        sudo useradd -r -g tomcat8 tomcat8 || true
+
     - name: Download and Extract Tomcat
       run: |
-        wget --no-check-certificate https://github.com/balavenkatatejaatla/maven-java-app/raw/main/scripts/apache-tomcat-8.5.100.tar.gz
+        wget https://github.com/balavenkatatejaatla/maven-java-app/raw/main/scripts/apache-tomcat-8.5.100.tar.gz
         sudo tar -zxvf apache-tomcat-8.5.100.tar.gz -C /opt/
         sudo chown -R tomcat8:tomcat8 /opt/apache-tomcat-8.5.100
 
