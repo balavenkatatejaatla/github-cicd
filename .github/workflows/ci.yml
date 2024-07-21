@@ -1,0 +1,90 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      run: |
+        sudo apt update
+        sudo apt install -y openjdk-8-jdk
+
+    - name: Install MySQL
+      run: |
+        sudo apt install -y mysql-server
+        sudo systemctl start mysql
+        sudo systemctl enable mysql
+
+    - name: Download and Extract Tomcat
+      run: |
+        wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.100/bin/apache-tomcat-8.5.100.tar.gz
+        sudo tar -zxvf apache-tomcat-8.5.100.tar.gz -C /opt/
+        sudo chown -R tomcat8:tomcat8 /opt/apache-tomcat-8.5.100
+
+    - name: Create Tomcat Service
+      run: |
+        sudo bash -c 'cat > /etc/systemd/system/tomcat.service <<EOF
+        [Unit]
+        Description=Apache Tomcat Web Application Container
+        After=network.target
+
+        [Service]
+        Type=forking
+        User=tomcat8
+        Group=tomcat8
+        Environment=CATALINA_PID=/opt/apache-tomcat-8.5.100/temp/tomcat.pid
+        Environment=CATALINA_HOME=/opt/apache-tomcat-8.5.100
+        Environment=CATALINA_BASE=/opt/apache-tomcat-8.5.100
+        Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+        ExecStart=/opt/apache-tomcat-8.5.100/bin/startup.sh
+        ExecStop=/opt/apache-tomcat-8.5.100/bin/shutdown.sh
+
+        [Install]
+        WantedBy=multi-user.target
+        EOF'
+        sudo systemctl daemon-reload
+        sudo systemctl enable tomcat
+        sudo systemctl start tomcat
+
+    - name: Set up MySQL Connector
+      run: |
+        sudo wget -nc -P /opt/apache-tomcat-8.5.100/lib https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
+        sudo chown tomcat8:tomcat8 /opt/apache-tomcat-8.5.100/lib/mysql-connector-java-8.0.30.jar
+
+    - name: Configure MySQL
+      run: |
+        sudo sed -i 's/bind-address\s*=.*$/bind-address=0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
+        sudo systemctl restart mysql
+
+    - name: Create Database
+      run: |
+        sudo mysql < /root/studentapp/scripts/script.sql
+
+    - name: Configure Tomcat
+      run: |
+        sudo bash -c 'cat >> /opt/apache-tomcat-8.5.100/conf/context.xml <<EOF
+        <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxActive="50" maxIdle="30" maxWait="10000" username="student" password="student@1" driverClassName="com.mysql.cj.jdbc.Driver" url="jdbc:mysql://10.0.0.4:3306/studentapp?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+        </Context>
+        EOF'
+        sudo systemctl restart tomcat
+
+    - name: Deploy WAR
+      run: |
+        sudo cp /root/studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.100/webapps/
+        sudo systemctl restart tomcat
+
+    - name: Verify Deployment
+      run: |
+        curl http://localhost:8080/studentapp.war
