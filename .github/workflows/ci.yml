@@ -29,9 +29,9 @@ jobs:
 
     - name: Download and Extract Tomcat
       run: |
-        wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.100/bin/apache-tomcat-8.5.100.tar.gz
-        sudo tar -zxvf apache-tomcat-8.5.100.tar.gz -C /opt/
-        sudo chown -R tomcat8:tomcat8 /opt/apache-tomcat-8.5.100
+        wget --no-check-certificate https://apache.mirrors.ionfish.org/tomcat/tomcat-8/v8.5.5/bin/apache-tomcat-8.5.5.tar.gz
+        sudo tar -zxvf apache-tomcat-8.5.5.tar.gz -C /opt/
+        sudo chown -R tomcat8:tomcat8 /opt/apache-tomcat-8.5.5
 
     - name: Create Tomcat Service
       run: |
@@ -44,12 +44,12 @@ jobs:
         Type=forking
         User=tomcat8
         Group=tomcat8
-        Environment=CATALINA_PID=/opt/apache-tomcat-8.5.100/temp/tomcat.pid
-        Environment=CATALINA_HOME=/opt/apache-tomcat-8.5.100
-        Environment=CATALINA_BASE=/opt/apache-tomcat-8.5.100
+        Environment=CATALINA_PID=/opt/apache-tomcat-8.5.5/temp/tomcat.pid
+        Environment=CATALINA_HOME=/opt/apache-tomcat-8.5.5
+        Environment=CATALINA_BASE=/opt/apache-tomcat-8.5.5
         Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
-        ExecStart=/opt/apache-tomcat-8.5.100/bin/startup.sh
-        ExecStop=/opt/apache-tomcat-8.5.100/bin/shutdown.sh
+        ExecStart=/opt/apache-tomcat-8.5.5/bin/startup.sh
+        ExecStop=/opt/apache-tomcat-8.5.5/bin/shutdown.sh
 
         [Install]
         WantedBy=multi-user.target
@@ -60,8 +60,8 @@ jobs:
 
     - name: Set up MySQL Connector
       run: |
-        sudo wget -nc -P /opt/apache-tomcat-8.5.100/lib https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
-        sudo chown tomcat8:tomcat8 /opt/apache-tomcat-8.5.100/lib/mysql-connector-java-8.0.30.jar
+        sudo wget -nc -P /opt/apache-tomcat-8.5.5/lib https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar
+        sudo chown tomcat8:tomcat8 /opt/apache-tomcat-8.5.5/lib/mysql-connector-java-8.0.30.jar
 
     - name: Configure MySQL
       run: |
@@ -74,7 +74,7 @@ jobs:
 
     - name: Configure Tomcat
       run: |
-        sudo bash -c 'cat >> /opt/apache-tomcat-8.5.100/conf/context.xml <<EOF
+        sudo bash -c 'cat >> /opt/apache-tomcat-8.5.5/conf/context.xml <<EOF
         <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxActive="50" maxIdle="30" maxWait="10000" username="student" password="student@1" driverClassName="com.mysql.cj.jdbc.Driver" url="jdbc:mysql://10.0.0.4:3306/studentapp?useSSL=false&amp;allowPublicKeyRetrieval=true"/>
         </Context>
         EOF'
@@ -82,7 +82,7 @@ jobs:
 
     - name: Deploy WAR
       run: |
-        sudo cp /root/studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.100/webapps/
+        sudo cp /root/studentapp/scripts/studentapp.war /opt/apache-tomcat-8.5.5/webapps/
         sudo systemctl restart tomcat
 
     - name: Verify Deployment
